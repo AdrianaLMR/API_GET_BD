@@ -1,56 +1,141 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import mysql.connector
 
-# Cria uma instância do aplicativo Flask
 app = Flask(__name__)
 
 def get_db_connection():
     """
-    Estabelece e retorna uma conexão com o banco de dados MySQL.
-    
-    :return: Conexão com o banco de dados
+    Cria e retorna uma conexão com o banco de dados MySQL.
+
+    Returns:
+        mysql.connector.connection_cext.CMySQLConnection: Conexão com o banco de dados.
     """
     conn = mysql.connector.connect(
-        host='localhost',          # Endereço do servidor MySQL
-        user='root',               # Nome de usuário para conectar ao MySQL
-        password='KUr52Vrkr7%5e%x6WUVB',  # Senha do usuário do MySQL
-        database='api_database'    # Nome do banco de dados a ser usado
+        host='localhost',
+        user='root', 
+        password='KUr52Vrkr7%5e%x6WUVB', 
+        database='api_database'
     )
     return conn
+
+@app.route('/usuarios', methods=['POST'])
+def create_usuario():
+    """
+    Cria um novo usuário na tabela 'usuarios' com os dados fornecidos.
+
+    Request Body (JSON):
+        - nome (str): Nome do usuário.
+        - email (str): Email do usuário.
+        - numero (str): Número de telefone do usuário.
+
+    Returns:
+        dict: Mensagem indicando sucesso na criação do usuário.
+        int: Código de status HTTP 201 (Created).
+    """
+    data = request.get_json()
+    nome = data['nome']
+    email = data['email']
+    numero = data['numero']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO usuarios (nome, email, numero) VALUES (%s, %s, %s)', (nome, email, numero))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'message': 'Usuário criado com sucesso!'}), 201
 
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
     """
-    Manipulador de rota para a URL '/usuarios'.
-    
-    Conecta ao banco de dados, executa uma consulta para obter todos os registros da tabela 'usuarios',
-    e retorna esses registros como uma resposta JSON.
-    
-    :return: Resposta JSON contendo a lista de usuários
+    Obtém todos os usuários da tabela 'usuarios'.
+
+    Returns:
+        list: Lista de usuários, cada um representado como um dicionário com campos 'id', 'nome', 'email' e 'numero'.
     """
-    # Obtém uma conexão com o banco de dados
     conn = get_db_connection()
-    
-    # Cria um cursor para executar comandos SQL
     cursor = conn.cursor(dictionary=True)
-    
-    # Executa a consulta SQL para obter todos os registros da tabela 'usuarios'
     cursor.execute('SELECT * FROM usuarios')
-    
-    # Recupera todos os resultados da consulta
     usuarios = cursor.fetchall()
-    
-    # Fecha o cursor e a conexão com o banco de dados
     cursor.close()
     conn.close()
     
-    # Retorna os resultados como uma resposta JSON
     return jsonify(usuarios)
 
-if __name__ == '__main__':
+@app.route('/usuarios/<int:id>', methods=['GET'])
+def get_usuario(id):
     """
-    Executa o aplicativo Flask em modo de depuração.
+    Obtém um usuário específico da tabela 'usuarios' pelo ID fornecido.
+
+    Args:
+        id (int): ID do usuário a ser obtido.
+
+    Returns:
+        dict: Dados do usuário, ou mensagem de erro se o usuário não for encontrado.
+        int: Código de status HTTP 404 (Not Found) se o usuário não for encontrado.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM usuarios WHERE id = %s', (id,))
+    usuario = cursor.fetchone()
+    cursor.close()
+    conn.close()
     
-    Quando executado diretamente, inicia o servidor de desenvolvimento Flask.
+    if usuario is None:
+        return jsonify({'message': 'Usuário não encontrado'}), 404
+
+    return jsonify(usuario)
+
+@app.route('/usuarios/<int:id>', methods=['PUT'])
+def update_usuario(id):
     """
+    Atualiza os dados de um usuário específico na tabela 'usuarios' pelo ID fornecido.
+
+    Args:
+        id (int): ID do usuário a ser atualizado.
+
+    Request Body (JSON):
+        - nome (str): Novo nome do usuário (opcional).
+        - email (str): Novo email do usuário (opcional).
+        - numero (str): Novo número de telefone do usuário (opcional).
+
+    Returns:
+        dict: Mensagem indicando sucesso na atualização do usuário.
+    """
+    data = request.get_json()
+    nome = data.get('nome')
+    email = data.get('email')
+    numero = data.get('numero')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE usuarios SET nome = %s, email = %s, numero = %s WHERE id = %s', (nome, email, numero, id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'message': 'Usuário atualizado com sucesso!'})
+
+@app.route('/usuarios/<int:id>', methods=['DELETE'])
+def delete_usuario(id):
+    """
+    Deleta um usuário específico da tabela 'usuarios' pelo ID fornecido.
+
+    Args:
+        id (int): ID do usuário a ser deletado.
+
+    Returns:
+        dict: Mensagem indicando sucesso na exclusão do usuário.
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM usuarios WHERE id = %s', (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({'message': 'Usuário deletado com sucesso!'})
+
+if __name__ == '__main__':
     app.run(debug=True)
