@@ -13,8 +13,8 @@ def get_db_connection():
     conn = mysql.connector.connect(
         host='localhost',
         user='root', 
-        password='KUr52Vrkr7%5e%x6WUVB', 
-        database='api_database'
+        password='password', # Substitua pelo seu password
+        database='api_database'  # Substitua pelo nome do seu banco de dado
     )
     return conn
 
