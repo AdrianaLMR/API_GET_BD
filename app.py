@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import mysql.connector
-import re
+#import re
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -16,33 +16,11 @@ def get_db_connection():
     conn = mysql.connector.connect(
         host='localhost',
         user='root',
-        password='KUr52Vrkr7%5e%x6WUVB',  # Substitua pelo seu password
+        password='password',  # Substitua pelo seu password
         database='api_database'  # Substitua pelo nome do seu banco de dados
     )
     return conn
 
-class Validador:
-    @staticmethod
-    def validar_email(email: str) -> bool:
-        """
-        Valida se o email está no formato correto.
-
-        :param email: Email a ser validado.
-        :return: True se o email for válido, False caso contrário.
-        """
-        padrao = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return re.match(padrao, email) is not None
-
-    @staticmethod
-    def validar_telefone(telefone: str) -> bool:
-        """
-        Valida se o telefone está no formato correto.
-
-        :param telefone: Telefone a ser validado.
-        :return: True se o telefone for válido, False caso contrário.
-        """
-        padrao = r'^\+?\d[\d\s-]{7,15}$'
-        return re.match(padrao, telefone) is not None
 
 @app.route('/usuarios', methods=['POST'])
 def create_usuario():
@@ -62,12 +40,6 @@ def create_usuario():
     nome = data.get('nome')
     email = data.get('email')
     telefone = data.get('telefone')
-    
-    # Verifica se o e-mail e o número são válidos
-    if not Validador.validar_email(email):
-        return jsonify({'message': 'Email inválido'}), 400
-    if not Validador.validar_telefone(telefone):
-        return jsonify({'message': 'Número de telefone inválido'}), 400
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -139,11 +111,6 @@ def update_usuario(id):
     nome = data.get('nome')
     email = data.get('email')
     telefone = data.get('telefone')
-    
-    if email and not Validador.validar_email(email):
-        return jsonify({'message': 'Email inválido'}), 400
-    if telefone and not Validador.validar_telefone(telefone):
-        return jsonify({'message': 'Número de telefone inválido'}), 400
     
     conn = get_db_connection()
     cursor = conn.cursor()

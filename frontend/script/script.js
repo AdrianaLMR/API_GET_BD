@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         adicionarUsuario();
     });
+    ;
+
 
     document.getElementById('edit-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -49,7 +51,7 @@ async function adicionarUsuario() {
     const data = await response.json();
     alert(data.message);
     fetchUsuarios();
-    
+
     // Limpa os campos após adicionar o usuário
     document.getElementById('usuario-form').reset();
 }
@@ -69,7 +71,7 @@ async function editarUsuario() {
     alert(data.message);
     document.getElementById('edit-modal').style.display = 'none';
     fetchUsuarios();
-    
+
     // Limpa os campos após editar o usuário
     document.getElementById('edit-form').reset();
 }
