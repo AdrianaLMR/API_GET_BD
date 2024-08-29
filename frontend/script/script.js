@@ -27,9 +27,9 @@ async function fetchUsuarios() {
                 <td>${usuario.id}</td>
                 <td>${usuario.nome}</td>
                 <td>${usuario.email}</td>
-                <td>${usuario.numero}</td>
+                <td>${usuario.telefone}</td>
                 <td>
-                    <button onclick="mostrarEditarModal(${usuario.id}, '${usuario.nome}', '${usuario.email}', '${usuario.numero}')">Editar</button>
+                    <button onclick="mostrarEditarModal(${usuario.id}, '${usuario.nome}', '${usuario.email}', '${usuario.telefone}')">Editar</button>
                     <button onclick="deletarUsuario(${usuario.id})">Excluir</button>
                 </td>
             </tr>`;
@@ -39,12 +39,12 @@ async function fetchUsuarios() {
 async function adicionarUsuario() {
     const nome = document.getElementById('nome').value;
     const email = document.getElementById('email').value;
-    const numero = document.getElementById('numero').value;
+    const telefone = document.getElementById('telefone').value;
 
     const response = await fetch('http://localhost:5000/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, numero })
+        body: JSON.stringify({ nome, email, telefone })
     });
     const data = await response.json();
     alert(data.message);
@@ -58,12 +58,12 @@ async function editarUsuario() {
     const id = document.getElementById('edit-id').value;
     const nome = document.getElementById('edit-nome').value;
     const email = document.getElementById('edit-email').value;
-    const numero = document.getElementById('edit-numero').value;
+    const telefone = document.getElementById('edit-telefone').value;
 
     const response = await fetch(`http://localhost:5000/usuarios/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, numero })
+        body: JSON.stringify({ nome, email, telefone })
     });
     const data = await response.json();
     alert(data.message);
@@ -81,10 +81,10 @@ async function deletarUsuario(id) {
     fetchUsuarios();
 }
 
-function mostrarEditarModal(id, nome, email, numero) {
+function mostrarEditarModal(id, nome, email, telefone) {
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-nome').value = nome;
     document.getElementById('edit-email').value = email;
-    document.getElementById('edit-numero').value = numero;
+    document.getElementById('edit-telefone').value = telefone;
     document.getElementById('edit-modal').style.display = 'block';
 }

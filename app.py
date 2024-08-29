@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 import re
+from flask_cors import CORS
 
 app = Flask(__name__)
 
+CORS(app)  # Permite todas as origens
 def get_db_connection():
     """
     Cria e retorna uma conexão com o banco de dados MySQL.
@@ -50,7 +52,7 @@ def create_usuario():
     Request Body (JSON):
         - nome (str): Nome do usuário.
         - email (str): Email do usuário.
-        - numero (str): Número de telefone do usuário.
+        - telefone (str): Número de telefone do usuário.
 
     Returns:
         dict: Mensagem indicando sucesso na criação do usuário.
@@ -59,17 +61,17 @@ def create_usuario():
     data = request.get_json()
     nome = data.get('nome')
     email = data.get('email')
-    numero = data.get('numero')
+    telefone = data.get('telefone')
     
     # Verifica se o e-mail e o número são válidos
     if not Validador.validar_email(email):
         return jsonify({'message': 'Email inválido'}), 400
-    if not Validador.validar_telefone(numero):
+    if not Validador.validar_telefone(telefone):
         return jsonify({'message': 'Número de telefone inválido'}), 400
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO usuarios (nome, email, numero) VALUES (%s, %s, %s)', (nome, email, numero))
+    cursor.execute('INSERT INTO usuarios (nome, email, telefone) VALUES (%s, %s, %s)', (nome, email, telefone))
     conn.commit()
     cursor.close()
     conn.close()
@@ -82,7 +84,7 @@ def get_usuarios():
     Obtém todos os usuários da tabela 'usuarios'.
 
     Returns:
-        list: Lista de usuários, cada um representado como um dicionário com campos 'id', 'nome', 'email' e 'numero'.
+        list: Lista de usuários, cada um representado como um dicionário com campos 'id', 'nome', 'email' e 'telefone'.
     """
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
@@ -128,7 +130,7 @@ def update_usuario(id):
     Request Body (JSON):
         - nome (str): Novo nome do usuário (opcional).
         - email (str): Novo email do usuário (opcional).
-        - numero (str): Novo número de telefone do usuário (opcional).
+        - telefone (str): Novo número de telefone do usuário (opcional).
 
     Returns:
         dict: Mensagem indicando sucesso na atualização do usuário.
@@ -136,16 +138,16 @@ def update_usuario(id):
     data = request.get_json()
     nome = data.get('nome')
     email = data.get('email')
-    numero = data.get('numero')
+    telefone = data.get('telefone')
     
     if email and not Validador.validar_email(email):
         return jsonify({'message': 'Email inválido'}), 400
-    if numero and not Validador.validar_telefone(numero):
+    if telefone and not Validador.validar_telefone(telefone):
         return jsonify({'message': 'Número de telefone inválido'}), 400
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('UPDATE usuarios SET nome = %s, email = %s, numero = %s WHERE id = %s', (nome, email, numero, id))
+    cursor.execute('UPDATE usuarios SET nome = %s, email = %s, telefone = %s WHERE id = %s', (nome, email, telefone, id))
     conn.commit()
     cursor.close()
     conn.close()
